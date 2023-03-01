@@ -1,4 +1,4 @@
 # DevSummit2023-A11y
 
 
-[Prefers reduced motion](demos/prefersreducedmotion.html)
+[Prefers reduced motion](demos/PrefersReducedMotion.html)
