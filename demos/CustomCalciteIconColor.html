@@ -1,0 +1,30 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+    <script type="module" src=https://js.arcgis.com/calcite-components/1.0.7/calcite.esm.js></script>
+    <link rel="stylesheet" type="text/css" href=https://js.arcgis.com/calcite-components/1.0.7/calcite.css />
+    <style>
+        /* WCAG 1.4.6: Contrast (Enhanced) - Level AAA */
+        calcite-icon {
+            --calcite-ui-icon-color: #a92519;
+        }
+    </style>
+</head>
+
+<body>
+
+    <calcite-label>
+        Desired subdomain
+        <calcite-input suffix-text=".city-of-acme.gov" placeholder="Enter your subdomain"
+            value="big-map-fan"></calcite-input>
+        <calcite-input-message>
+            <calcite-icon icon="exclamation-mark-circle-f" scale="s"></calcite-icon>
+            &nbsp; Sorry, this domain is not available.
+        </calcite-input-message>
+    </calcite-label>
+
+</body>
+
+</html>

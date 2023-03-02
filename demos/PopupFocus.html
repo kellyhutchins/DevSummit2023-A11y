@@ -1,0 +1,92 @@
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>
+        2023 DevSummit: JS Maps SDK Popup focus
+    </title>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.26/esri/themes/light/main.css" />
+    <style>
+        html,
+        body,
+        #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+
+        #instruction {
+            z-index: 99;
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            padding: 5px;
+            margin-left: -175px;
+            height: 30px;
+            width: 355px;
+            background: rgba(25, 25, 25, 0.8);
+            color: white;
+        }
+    </style>
+    <script src="https://js.arcgis.com/4.26/"></script>
+    <script>require(["esri/rest/locator", "esri/Map", "esri/views/MapView"], (
+            locator,
+            Map,
+            MapView
+        ) => {
+            // Geocoding service locator
+            const locatorUrl =
+                "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer";
+
+            const map = new Map({
+                basemap: "streets-navigation-vector"
+            });
+
+            const view = new MapView({
+                container: "viewDiv",
+                map: map,
+                center: [-116.5392, 33.8259],
+                zoom: 12
+            });
+
+            view.popup.autoOpenEnabled = false;
+            view.on("click", (event) => {
+                // Get the coordinates of the click on the view
+                const lat = Math.round(event.mapPoint.latitude * 1000) / 1000;
+                const lon = Math.round(event.mapPoint.longitude * 1000) / 1000;
+
+                view.popup.open({
+                    title: "Reverse geocode: [" + lon + ", " + lat + "]",
+                    location: event.mapPoint,
+                    shouldFocus: true // Sets the popup focus on open
+                });
+
+                const params = {
+                    location: event.mapPoint
+                };
+
+                // Display the popup
+                locator
+                    .locationToAddress(locatorUrl, params)
+                    .then((response) => {
+                        view.popup.content = response.address;
+                    })
+                    .catch(() => {
+                        view.popup.content = "No address was found for this location";
+                    });
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <div id="viewDiv"></div>
+    <div id="instruction" class="esri-widget">
+        Click any location on the map to see its street address
+    </div>
+</body>
+
+</html>
