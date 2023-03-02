@@ -1,0 +1,70 @@
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>
+    Map Description
+  </title>
+
+  <link rel="stylesheet" href="https://js.arcgis.com/4.26/esri/themes/light/main.css" />
+  <style>
+    html,
+    body,
+    #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+  </style>
+  <script src="https://js.arcgis.com/4.26/"></script>
+  <script>
+  require(["esri/views/MapView", "esri/core/reactiveUtils", "esri/WebMap"], (
+  MapView,
+  reactiveUtils,
+  WebMap
+) => {
+  const map = new WebMap({
+    portalItem: {
+      id: "f2e9b762544945f390ca4ac3671cfa72"
+    }
+  });
+
+  const view = new MapView({
+    map,
+    container: "viewDiv"
+  });
+
+  view.when(() => {
+    document.getElementById("mapDescription").innerHTML =
+      map.portalItem.snippet;
+
+    view.container.setAttribute("aria-describedby", "mapDescription");
+    const rootNode = document.getElementsByClassName("esri-view-surface");
+    for (let k = 0; k < rootNode.length; k++) {
+      rootNode[k].setAttribute("aria-describedby", "mapDescription");
+    }
+  });
+});
+
+  </script>
+</head>
+
+<body>
+  <div id="viewDiv"></div>
+  <div id="mapDescription" class="sr-only"></div>
+</body>
+
+</html>
