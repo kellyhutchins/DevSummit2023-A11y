@@ -1,3 +1,7 @@
+<!--
+    1. Calcite sample: https://developers.arcgis.com/calcite-design-system/components/input
+    2. Codepen sample: https://codepen.io/geospatialem/pen/WNgoYKe
+-->
 <html>
 
 <head>
@@ -7,8 +11,8 @@
     <link rel="stylesheet" type="text/css" href=https://js.arcgis.com/calcite-components/1.0.7/calcite.css />
     <style>
         /* WCAG 1.4.6: Contrast (Enhanced) - Level AAA */
-        calcite-icon {
-            --calcite-ui-icon-color: #a92519;
+        body {
+            --calcite-ui-danger: #a92519;
         }
     </style>
 </head>
@@ -17,11 +21,10 @@
 
     <calcite-label>
         Desired subdomain
-        <calcite-input suffix-text=".city-of-acme.gov" placeholder="Enter your subdomain"
+        <calcite-input status="invalid" suffix-text=".city-of-acme.gov" placeholder="Enter your subdomain"
             value="big-map-fan"></calcite-input>
-        <calcite-input-message>
-            <calcite-icon icon="exclamation-mark-circle-f" scale="s"></calcite-icon>
-            &nbsp; Sorry, this domain is not available.
+        <calcite-input-message icon="exclamation-mark-circle-f" status="invalid">
+            Apologies, this subdomain has already been registered.
         </calcite-input-message>
     </calcite-label>
 
