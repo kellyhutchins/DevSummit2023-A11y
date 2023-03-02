@@ -1,10 +1,10 @@
 # DevSummit2023-A11y
 
 ## Demos
-- Disable animation when prefers reduced motion is active [Prefers reduced motion](demos/PrefersReducedMotion.html)
-- Handle focus switch between search and search results popup. [Search Focus](demos/SearchFocus.html)
-- [Focus popup on open](demos/PopupFocus.html)
-- Add a description to the map using aria-describedby [Map Description](demos/MapDescription.html)
+- [Prefers reduced motion](demos/PrefersReducedMotion.html) Disable animation when prefers reduced motion is active 
+- [Search Focus](demos/SearchFocus.html) Handle focus switch between search and search results popup.
+- [Focus popup on open](demos/PopupFocus.html) Use the shouldFocus option on Popup.open
+- [Map Description](demos/MapDescription.html) Add a description to the map using aria-describedby
 - [High Contrast Basemap Toggle](demos/HighContrastBasemapToggle.html)
 
 ## Calcite Demos
