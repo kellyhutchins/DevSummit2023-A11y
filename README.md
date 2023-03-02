@@ -9,6 +9,7 @@ Presented at the 2023 Esri Developer Summit by [Kelly Hutchins](https://github.c
 - [Focus popup on open](demos/PopupFocus.html): Use the `shouldFocus` option on `Popup.open`.
 - [Map description](demos/MapDescription.html): Add a description to the map using `aria-describedby`.
 - [High contrast basemap with BasemapToggle](demos/HighContrastBasemapToggle.html): Toggle between the light and dark high contrast basemaps using the BasemapToggle widget.
+- [Map Navigation](demos/MapNavigation.html) Demonstrate one option for navigating map data via the keyboard. Also shows how to use [Aria Live Regions](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Live_Regions) to update assistive technology about dynamic changes.
 
 ## Calcite Demos
 

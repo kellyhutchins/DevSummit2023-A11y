@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map Navigation</title>
+    <script type="module" src="https://js.arcgis.com/calcite-components/1.0.7/calcite.esm.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/1.0.7/calcite.css" />
+    <link rel="stylesheet" href="https://js.arcgis.com/4.26/esri/themes/light/main.css" />
+    <style>
+        html,
+        body,
+        #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+
+        .screen-readers-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+    </style>
+    <script src="https://js.arcgis.com/4.26/"></script>
+    <script>
+
+        require(["esri/views/MapView", "esri/WebMap", "esri/Graphic", "esri/layers/GraphicsLayer", "esri/symbols/SimpleFillSymbol", "esri/geometry/Extent", "esri/core/reactiveUtils", "esri/geometry/support/jsonUtils"], (MapView, WebMap, Graphic, GraphicsLayer, SimpleFillSymbol, Extent, reactiveUtils, jsonUtils) => {
+            let handles = [];
+            let features = [];
+            let navigationButton = null;
+            const liveRegionId = "a11y-live-region";
+
+            const viewConstraintGeometry = jsonUtils.fromJSON({
+                spatialReference: {
+                    latestWkid: 3857,
+                    wkid: 102100
+                },
+                rings: [[[
+                    -13256282.548519943,
+                    4022419.805118838
+                ],
+                [
+                    -13256282.548519943,
+                    4060557.7020831467
+                ],
+                [
+                    -13175031.480363533,
+                    4060557.7020831467
+                ],
+                [
+                    -13175031.480363533,
+                    4022419.805118838
+                ],
+                [
+                    -13256282.548519943,
+                    4022419.805118838
+                ]
+                ]
+                ]
+            });
+            // Setup a live region where we can announce dynamic changes 
+            // in page content to assistive technology 
+            //https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Live_Regions
+            setupLiveRegion("polite");
+            const symbol = new SimpleFillSymbol({
+                style: "none",
+                outline: {
+                    color: "#333",
+                    width: 3
+                }
+            });
+            const map = new WebMap({
+                portalItem: {
+                    id: "390946e245e5402f823d3a62186c85aa"
+                }
+            });
+
+            // Add a Graphics Layer to the map to display the map 
+            // navigation extent search box     
+            const graphicsLayer = new GraphicsLayer({
+                listMode: "hide"
+            });
+            map.add(graphicsLayer);
+
+            const view = new MapView({
+                map,
+                // Define map constraints to prevent navigation outside the map data area 
+                constraints: {
+                    geometry: viewConstraintGeometry,
+                    minScale: 313475.432454,
+                    maxScale: 0
+                },
+                container: "viewDiv"
+            });
+
+
+            // Add a Calcite button to the map. When pressed it will display
+            // a search graphic and apply focus to the map
+            navigationButton = document.createElement("calcite-button");
+            navigationButton.iconStart = "map-pin";
+            navigationButton.innerHTML = "Browse Map";
+            navigationButton.addEventListener("click", navigateMap);
+            view.ui.add(navigationButton, "top-right");
+            function navigateMap() {
+                view.focus();
+                handleMapGraphics();
+                handles = [
+                    reactiveUtils.watch(() => view.navigating,
+                        () => {
+                            handleMapGraphics();
+                        }),
+                    view.on("key-down", (e) => {
+                        if (e?.key === "Escape") {
+                            cleanUp();
+                        } else if (e?.key === "p") {
+                            if (features?.length > 0)
+                                displayFeatures(features, true);
+                        }
+                    })
+                ]
+            }
+            function handleMapGraphics() {
+                features = [];
+                graphicsLayer.removeAll();
+                const center = view.center;
+                const tolerance = view.scale / 120;
+                const geometry = new Extent({
+                    xmin: center.x - tolerance,
+                    ymin: center.y - tolerance,
+                    xmax: center.x + tolerance,
+                    ymax: center.y + tolerance,
+                    spatialReference: view.center.spatialReference
+                });
+                const graphic = new Graphic({
+                    geometry,
+                    symbol
+                });
+                graphicsLayer.add(graphic);
+                // Query to find features all layers w/in the search extent
+                const flayerViews = view.layerViews?.filter((lv) => {
+                    return lv?.layer.type === "feature";
+                });
+
+                Promise.all(
+                    flayerViews.map((layerView) => {
+                        const query = layerView.layer.createQuery();
+                        query.geometry = graphic.geometry;
+                        return layerView.queryFeatures(query);
+                    })
+                ).then(results => {
+                    const concatenatedResults = results?.reduce((prev, curr) => {
+                        prev.features = prev.features.concat(curr.features);
+                        return prev;
+                    });
+                    features = concatenatedResults?.features;
+                    const length = features?.length > 0 ? features.length : 0;
+                    // Notify assistive technology that features have been found and 
+                    // are accessible by pressing the p key 
+                    postToLiveRegion(
+                        `${length} features found in the search area. Press p to browse features`
+                    );
+
+                    length > 0
+                        ? displayFeatures(features)
+                        : view.popup.close();
+                });
+
+            }
+            function displayFeatures(features, shouldFocus = false) {
+                view.popup.dockEnabled = true;
+                view.popup.dockOptions = {
+                    buttonEnabled: false,
+                    breakpoint: true,
+                    position: "bottom-center"
+                };
+                view.popup.viewModel.includeDefaultActions = false;
+                view.popup.collapseEnabled = false;
+                view.popup.open({ features, shouldFocus });
+            }
+            function cleanUp() {
+                // clean up
+
+                features = [];
+                graphicsLayer.removeAll();
+                view.popup.close();
+                view.popup.dockEnabled = false;
+                handles.forEach((handle) => {
+                    handle.remove();
+                });
+                navigationButton.setFocus();
+            }
+
+
+            function setupLiveRegion(mode) {
+                // Mode can be assertive or polite
+                const root = document.body;
+
+                let region = root.querySelector(`#${liveRegionId}`);
+                if (!region) {
+                    region = document.createElement("div");
+                    region.id = liveRegionId;
+                    region.classList.add("screen-readers-only");
+                    region.setAttribute("role", "alert");
+                    region.setAttribute("aria-live", mode);
+                    region.setAttribute("aria-atomic", "true");
+                    region.textContent = "";
+                    root.appendChild(region);
+                }
+                return region;
+            }
+            function postToLiveRegion(message, id) {
+
+                const region = document.body.querySelector(`#${liveRegionId}`);
+                if (region) {
+                    region.textContent = message;
+                }
+            }
+        });
+    </script>
+</head>
+
+<body>
+    <div id="viewDiv"></div>
+</body>
+
+</html>
