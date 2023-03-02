@@ -1,80 +1,95 @@
-<!-- CSS theme will toggle when toggling the basemap-->
-<link id="darkTheme" rel="stylesheet" href="https://js.arcgis.com/4.26/esri/themes/dark/main.css" />
-<link id="lightTheme" rel="stylesheet" href="https://js.arcgis.com/4.26/esri/themes/light/main.css" disabled />
-<style>
-    html,
-    body,
-    #viewDiv {
-        padding: 0;
-        margin: 0;
-        height: 100%;
-        width: 100%;
-    }
-</style>
-<script src="https://js.arcgis.com/4.26/"></script>
-<script>
-    /* Working with Enhanced Contrast basmaps to improve accessibility blog post
-https://www.esri.com/arcgis-blog/products/arcgis-living-atlas/mapping/working-with-enhanced-contrast-basemaps-to-improve-accessibility */
+<!DOCTYPE html>
+<html lang="en">
 
-    require([
-        "esri/Map",
-        "esri/views/MapView",
-        "esri/Basemap",
-        "esri/widgets/BasemapToggle"
-    ], (Map, MapView, Basemap, BasemapToggle) => {
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>High Contrast Basemap Toggle</title>
+    <!-- CSS theme will toggle when toggling the basemap-->
+    <link id="darkTheme" rel="stylesheet" href="https://js.arcgis.com/4.26/esri/themes/dark/main.css" />
+    <link id="lightTheme" rel="stylesheet" href="https://js.arcgis.com/4.26/esri/themes/light/main.css" disabled />
+    <style>
+        html,
+        body,
+        #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+    <script src="https://js.arcgis.com/4.26/"></script>
+</head>
 
-        // High contrast basemap (light)
-        const highContrastLightBasemap = new Basemap({
-            portalItem: {
-                id: "084291b0ecad4588b8c8853898d72445" // Light
-            },
-            title: "High contrast (light theme)",
-            id: "high-contrast-light"
+<body>
+    <div id="viewDiv"></div>
+    <div id="baseToggleDiv"></div>
+
+    <script>
+        /* Working with Enhanced Contrast basmaps to improve accessibility blog post
+    https://www.esri.com/arcgis-blog/products/arcgis-living-atlas/mapping/working-with-enhanced-contrast-basemaps-to-improve-accessibility */
+
+        require([
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/Basemap",
+            "esri/widgets/BasemapToggle"
+        ], (Map, MapView, Basemap, BasemapToggle) => {
+
+            // High contrast basemap (light)
+            const highContrastLightBasemap = new Basemap({
+                portalItem: {
+                    id: "084291b0ecad4588b8c8853898d72445" // Light
+                },
+                title: "High contrast (light theme)",
+                id: "high-contrast-light"
+            });
+
+            // High contrast basemap (dark)
+            const highContrastDarkBasemap = new Basemap({
+                portalItem: {
+                    id: "3e23478909194c54992eaaee78b5f754" // Dark
+                },
+                title: "High contrast dark theme",
+                id: "high-contrast-dark"
+            });
+
+            // Add high contrast basemap to the map
+            const map = new Map({
+                basemap: highContrastLightBasemap,
+            });
+
+            // Reference the map in the view instance
+            const view = new MapView({
+                container: "viewDiv",
+                map: map,
+                zoom: 15,
+                center: [-93.0966, 44.9432]
+            });
+
+            // Basemap toggle widget
+            const baseToggleWidget = new BasemapToggle({
+                view: view,
+                nextBasemap: highContrastDarkBasemap, // High contrast dark
+                container: baseToggleDiv
+            });
+
+            view.ui.add(baseToggleWidget, {
+                position: "top-right"
+            });
         });
 
-        // High contrast basemap (dark)
-        const highContrastDarkBasemap = new Basemap({
-            portalItem: {
-                id: "3e23478909194c54992eaaee78b5f754" // Dark
-            },
-            title: "High contrast dark theme",
-            id: "high-contrast-dark"
-        });
+        /* Toggle the JS Maps SDK theme for additional contrast on the controls */
+        const baseToggleDiv = document.getElementById("baseToggleDiv");
+        baseToggleDiv.addEventListener("click", (evt) => {
+            const lightTheme = document.getElementById("darkTheme");
+            const darkTheme = document.getElementById("lightTheme");
 
-        // Add high contrast basemap to the map
-        const map = new Map({
-            basemap: highContrastLightBasemap,
-        });
+            lightTheme.toggleAttribute("disabled");
+            darkTheme.toggleAttribute("disabled");
+        })
+    </script>
+</body>
 
-        // Reference the map in the view instance
-        const view = new MapView({
-            container: "viewDiv",
-            map: map,
-            zoom: 15,
-            center: [-93.0966, 44.9432]
-        });
-
-        // Basemap toggle widget
-        const baseToggleWidget = new BasemapToggle({
-            view: view,
-            nextBasemap: highContrastDarkBasemap, // High contrast dark
-            container: baseToggleDiv
-        });
-
-        view.ui.add(baseToggleWidget, {
-            position: "top-right"
-        });
-    });
-
-    /* Toggle the JS Maps SDK theme for additional contrast on the controls */
-    const baseToggleDiv = document.getElementById("baseToggleDiv");
-    baseToggleDiv.addEventListener("click", (evt) => {
-        const lightTheme = document.getElementById("darkTheme");
-        const darkTheme = document.getElementById("lightTheme");
-
-        lightTheme.toggleAttribute("disabled");
-        darkTheme.toggleAttribute("disabled");
-    })
-</script>
-<div id="viewDiv"></div>
-<div id="baseToggleDiv"></div>
+</html>

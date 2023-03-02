@@ -1,46 +1,61 @@
-<script type="module" src="https://js.arcgis.com/calcite-components/1.0.7/calcite.esm.js"></script>
-<link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/1.0.7/calcite.css">
-<style>
-    calcite-link {
-        display: flex;
-        margin: 1rem;
-    }
+<!DOCTYPE html>
+<html lang="en">
 
-    calcite-button[target="_blank"]::after,
-    calcite-link[target="_blank"]::after {
-        content: " (opens in new tab)";
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        border: 0;
-    }
-</style>
-<script>
-    (async () => {
-        await customElements.whenDefined("calcite-link");
-        const calLink = document.querySelectorAll("calcite-link");
-        for (let i = 0; i < calLink.length; i++) {
-            if (calLink[i].target === "_blank" && !calLink[i].iconEnd) {
-                calLink[i].iconEnd = "launch";
-            }
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamically Add External Links</title>
+    <script type="module" src="https://js.arcgis.com/calcite-components/1.0.7/calcite.esm.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/1.0.7/calcite.css">
+    <style>
+        calcite-link {
+            display: flex;
+            margin: 1rem;
         }
-        await customElements.whenDefined("calcite-button");
-        const calBtn = document.querySelectorAll("calcite-button");
-        for (let i = 0; i < calBtn.length; i++) {
-            if (calBtn[i].target === "_blank" && !calBtn[i].iconEnd) {
-                calBtn[i].iconEnd = "launch";
-            }
+
+        calcite-button[target="_blank"]::after,
+        calcite-link[target="_blank"]::after {
+            content: " (opens in new tab)";
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
         }
-    })();
+    </style>
 
-</script>
-<!-- Icon not added -->
-<calcite-link href="https://developers.arcgis.com">ArcGIS Developers</calcite-link>
+</head>
 
-<!-- Icon added on-the-fly when target is set to blank -->
-<calcite-link href="https://developers.arcgis.com/calcite-design-system" target="_blank">Calcite Design
-    System</calcite-link>
+<body>
+    <!-- Icon not added -->
+    <calcite-link href="https://developers.arcgis.com">ArcGIS Developers</calcite-link>
+
+    <!-- Icon added on-the-fly when target is set to blank -->
+    <calcite-link href="https://developers.arcgis.com/calcite-design-system" target="_blank">Calcite Design
+        System</calcite-link>
+    <script>
+        (async () => {
+            await customElements.whenDefined("calcite-link");
+            const calLink = document.querySelectorAll("calcite-link");
+            for (let i = 0; i < calLink.length; i++) {
+                if (calLink[i].target === "_blank" && !calLink[i].iconEnd) {
+                    calLink[i].iconEnd = "launch";
+                }
+            }
+            await customElements.whenDefined("calcite-button");
+            const calBtn = document.querySelectorAll("calcite-button");
+            for (let i = 0; i < calBtn.length; i++) {
+                if (calBtn[i].target === "_blank" && !calBtn[i].iconEnd) {
+                    calBtn[i].iconEnd = "launch";
+                }
+            }
+        })();
+
+    </script>
+</body>
+
+</html>
