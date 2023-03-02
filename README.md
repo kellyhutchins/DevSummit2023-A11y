@@ -2,3 +2,4 @@
 
 
 [Prefers reduced motion](demos/PrefersReducedMotion.html)
+[Search Focus](demos/SearchFocus.html)
