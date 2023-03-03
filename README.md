@@ -23,3 +23,11 @@ Presented at the 2023 Esri Developer Summit by [Kelly Hutchins](https://github.c
 - [Reduced motion support with Calcite Loader](demos/ReducedMotionSupportCalciteLoader.html): Calcite disables animation when system animations are disabled.
 - [High Contrast with Calcite Dropdown](demos/HighContrastWithCalciteDropdown.html): Calcite enables high contrast colors when enabled on the system.
 - [Apply core concepts tutorial](demos/CalciteApplyCoreConcepts.html): Tutorial showcased with Color Oracle tool.
+
+## Resources
+
+- Codepen collections
+  - https://codepen.io/collection/WvMEJM
+  - https://codepen.io/collection/BNzmVw
+- [Calcite and accessibility](https://developers.arcgis.com/calcite-design-system/foundations/accessibility)
+- [Subscribe to the Esri accessibility community](https://community.esri.com/t5/accessibility/ct-p/accessibility)
