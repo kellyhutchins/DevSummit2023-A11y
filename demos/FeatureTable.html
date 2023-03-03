@@ -1,0 +1,292 @@
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no" />
+    <title>
+        Layer List with table and export to csv
+    </title>
+    <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/1.0.7/calcite.css" />
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.26/esri/themes/light/main.css" />
+    <script type="module" src="https://js.arcgis.com/calcite-components/1.0.7/calcite.esm.js"></script>
+    <script src="https://js.arcgis.com/4.26/"></script>
+
+    <style>
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #viewDiv {
+            height: 100%;
+            width: 100%;
+        }
+
+        .table-container {
+            display: block;
+            height: 50vh;
+            position: fixed;
+            left: 0px;
+            right: 0px;
+            bottom: 20px;
+            z-index: 2;
+            margin-left: 0;
+        }
+
+        .table-content {
+            height: 50vh;
+        }
+
+        .hide {
+            display: none;
+        }
+    </style>
+    <script>
+        require([
+            "esri/WebMap",
+            "esri/views/MapView",
+            "esri/widgets/LayerList",
+            "esri/widgets/FeatureTable",
+            "esri/core/Collection",
+            "esri/core/reactiveUtils"
+
+        ], function (WebMap, MapView, LayerList, FeatureTable, Collection, reactiveUtils) {
+
+            let table = null;
+            let layer = null;
+            // Containers that will hold the table 
+            const container = document.getElementById("tablePanel");
+            const tableContentArea = document.getElementById("tableContent");
+            // Application events 
+            container.addEventListener("calcitePanelClose", () => {
+                removeTable()
+            });
+            document.getElementById("exportCSV").addEventListener("click", () => {
+                const viewModel = table.viewModel;
+                const query = layer.createQuery();
+                query.geometry = view.extent;
+                query.returnGeometry = false;
+                // only show selected fields
+                let attributesToShow = [];
+                viewModel?.columns?.forEach((column) => {
+                    if (!column?.hidden) {
+                        attributesToShow.push(column?.name);
+                    }
+                });
+
+                query.outFields = attributesToShow;
+                const oids = [];
+                viewModel.highlightIds?.map((item) => {
+                    oids.push(item);
+                });
+                query.objectIds = oids;
+
+                // Sort the features based on the table sort order
+
+                const sortOrders = (table).activeSortOrders;
+                const sortOrder = sortOrders?.length > 0 ? sortOrders[0] : null;
+
+                if (sortOrder) {
+                    const { direction, fieldName } = sortOrder;
+                    query.orderByFields = [`${fieldName} ${direction?.toUpperCase()}`];
+                }
+
+                layer.queryFeatures(query).then((results) => {
+                    const features = results?.features;
+                    if (features?.length > 0) {
+                        exportCSVData(features, layer);
+                    }
+                });
+            }
+            )
+            const map = new WebMap({
+                portalItem: {
+                    id: "390946e245e5402f823d3a62186c85aa"
+                }
+            });
+
+            const view = new MapView({
+                container: "viewDiv",
+                map
+            });
+            const layerList = new LayerList({
+                view,
+                // Add table action to the layer list
+                listItemCreatedFunction: (event) => {
+                    const item = event.item;
+                    if (item?.layer?.type !== "feature") {
+                        return;
+                    }
+                    item.actionsSections = [
+                        [
+                            {
+                                title: "Table",
+                                className: "esri-icon-table",
+                                id: "show-table"
+                            }
+                        ]
+                    ];
+                }
+            });
+            layerList.on("trigger-action", (actionEvent) => {
+                // When the table button in the layer list is clicked
+                // open the table in the map
+                const { item, action } = actionEvent;
+
+                if (action.id === "show-table") {
+                    layer = item.layer;
+                    document.getElementById("tablePanel").heading = layer.title;
+                    removeTable();
+                    createTable();
+                }
+            });
+            view.ui.add(layerList, "top-right");
+
+            function removeTable() {
+
+                if (container) container.classList.add("hide");
+                if (container) container.setAttribute("closed", true);
+                table?.clearHighlights();
+                tableContentArea.innerHTML = null;
+                // Enable map popups when table is closed 
+                view.popup.autoOpenEnabled = true;
+            }
+            function addTable() {
+                // Add the table to the map and open the panel 
+                if (container) container.classList.remove("hide");
+                if (container) container.removeAttribute("closed");
+                // Disable map popups when table is open 
+                view.popup.close();
+                view.popup.autoOpenEnabled = false;
+            }
+            function createTable() {
+
+                const tableDiv = document.createElement("div");
+
+                tableDiv.classList.add("manual-feature-table");
+                const hiddenFields = new Collection();
+
+                hiddenFields.add(layer?.objectIdField);
+
+                tableContentArea.appendChild(tableDiv);
+
+                table = new FeatureTable({
+                    view,
+                    columnReorderingEnabled: false,
+                    layer,
+                    hiddenFields,
+                    container: tableDiv
+                });
+
+                addTable();
+                reactiveUtils.when(
+                    () => view?.stationary,
+                    () => {
+                        if (view?.extent) table.filterGeometry = view.extent;
+                    }, { initial: true }
+                );
+
+                view.on("immediate-click", (event) => {
+                    if (container.classList?.contains("hide")) {
+                        return;
+                    }
+                    // select table row when map is clicked
+                    view.hitTest(event).then((response) => {
+                        response?.results?.some((result) => {
+                            if (result?.type === "graphic") {
+                                // Only select the currently open table row 
+                                const graphic = result.graphic;
+                                if (
+                                    graphic?.layer?.type === "feature" &&
+                                    graphic?.layer?.id === table?.layer?.id
+                                ) {
+                                    table.selectRows(graphic);
+                                    return true;
+                                }
+                            } else {
+                                return false;
+                            }
+                            return result;
+                        });
+                    });
+                });
+            }
+
+            function exportCSVData(featureData, layer) {
+                // Add an export to csv option to the table menu 
+                const data = [];
+                featureData?.forEach((feature, index) => {
+
+                    if (index === 0) {
+                        const rowKeys = [];
+                        // add keys
+                        for (const rk in feature?.attributes) {
+                            let alias = rk;
+                            layer?.fields?.some(field => {
+                                if (field?.name === rk) {
+                                    if (field?.alias) { alias = field.alias };
+                                    return true;
+                                }
+                            });
+                            rowKeys.push(alias);
+                        }
+                        data.push(rowKeys);
+                    }
+
+                    // get attributes
+                    const values = [];
+                    for (const key in feature?.attributes) {
+                        values.push(feature.attributes[key]);
+                    }
+                    data.push(values);
+
+                });
+                const csvdata = convertArrayToCSV(data);
+                // download csv
+                const resultTitle = layer?.title || 'results';
+                downloadBlob(csvdata, `${resultTitle}.csv`, 'text/csv;charset=utf-8;');
+
+            }
+
+            function convertArrayToCSV(data) {
+                return data.map(row =>
+                    row
+                        .map(String)  // convert every value to String
+                        .map(v => v.replaceAll('"', '""'))  // escape double colons
+                        .map(v => `"${v}"`)  // quote it
+                        .join(',')  // comma-separated
+                ).join('\r\n');  // rows starting on new lines
+
+            }
+            function downloadBlob(content, filename, contentType) {
+                // Create a blob
+                var blob = new Blob([content], { type: contentType });
+                var url = URL.createObjectURL(blob);
+
+                // Create a link to download it
+                var csvDownload = document.createElement('a');
+                csvDownload.href = url;
+                csvDownload.setAttribute('download', filename);
+                csvDownload.click();
+            }
+        });
+    </script>
+</head>
+
+<body>
+    <div id="viewDiv"></div>
+    <calcite-panel class="table-container hide" id="tablePanel" closable closed>
+        <div slot="header-actions-end">
+            <calcite-action id="exportCSV" icon="file-csv" text="Export to CSV"></calcite-action>
+        </div>
+        <div id="tableContent" class="table-content"></div>
+    </calcite-panel>
+
+
+</body>
+
+</html>
