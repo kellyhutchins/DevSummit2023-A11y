@@ -27,7 +27,7 @@ Presented at the 2023 Esri Developer Summit by [Kelly Hutchins](https://github.c
 ## Resources
 
 - Codepen collections
-  - https://codepen.io/collection/WvMEJM
-  - https://codepen.io/collection/BNzmVw
+  - [https://codepen.io/collection/WvMEJM](https://codepen.io/collection/WvMEJM)
+  - [https://codepen.io/collection/BNzmVw](https://codepen.io/collection/BNzmVw)
 - [Calcite and accessibility](https://developers.arcgis.com/calcite-design-system/foundations/accessibility)
 - [Subscribe to the Esri accessibility community](https://community.esri.com/t5/accessibility/ct-p/accessibility)
