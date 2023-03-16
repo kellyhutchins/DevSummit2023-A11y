@@ -4,6 +4,7 @@ Presented at the 2023 Esri Developer Summit by [Kelly Hutchins](https://github.c
 
 - [Demo site](https://kellyhutchins.github.io/DevSummit2023-A11y)
 - [Code](https://github.com/kellyhutchins/DevSummit2023-A11y)
+- <a href="2023-devsummit-building-accessible-web-apps-js-calcite.pdf" target="_blank">Slides</a> (opens in a new window)
 
 ## JS Maps SDK Demos
 
