@@ -61,10 +61,10 @@
                     <calcite-label>
                         Year data to display
                         <calcite-select id="control-year-el">
-                            <calcite-option label="Total of all time" value="TOTAL"></calcite-option>
-                            <calcite-option label="2018" value="F2018"></calcite-option>
-                            <calcite-option label="2019" value="F2019"></calcite-option>
+                            <calcite-option label="2022" value="F2022"></calcite-option>
+                            <calcite-option label="2021" value="F2021"></calcite-option>
                             <calcite-option label="2020" value="F2020"></calcite-option>
+                            <calcite-option label="2019" value="F2019"></calcite-option>
                         </calcite-select>
                     </calcite-label>
                     <calcite-label>
@@ -147,20 +147,20 @@
                 content: [{
                     type: "fields",
                     fieldInfos: [{
-                        fieldName: "TOTAL",
-                        label: "Total visits",
+                        fieldName: "F2022",
+                        label: "2022",
                         format: { digitSeparator: true }
                     }, {
-                        fieldName: "F2018",
-                        label: "2018",
-                        format: { digitSeparator: true }
-                    }, {
-                        fieldName: "F2019",
-                        label: "2019",
+                        fieldName: "F2021",
+                        label: "2021",
                         format: { digitSeparator: true }
                     }, {
                         fieldName: "F2020",
                         label: "2020",
+                        format: { digitSeparator: true }
+                    }, {
+                        fieldName: "F2019",
+                        label: "2019",
                         format: { digitSeparator: true }
                     }]
                 }]
@@ -179,7 +179,7 @@
 
         const countDefault = 1;
         const orderByDefault = "DESC"
-        const yearDefault = "TOTAL"
+        const yearDefault = "F2022"
 
         let count = countDefault;
         let orderBy = orderByDefault;
@@ -193,7 +193,7 @@
                     orderByFields: `${year} ${orderBy}`
                 }),
                 orderByFields: `${year} ${orderBy}`,
-                outFields: ["State, TOTAL, F2018, F2019, F2020, Park"],
+                outFields: ["State, F2022, F2021, F2020, F2019, Park"],
                 returnGeometry: true,
                 cacheHint: false
             });
@@ -214,7 +214,7 @@
                 chip.innerText = attributes.State;
                 item.label = attributes.Park;
                 item.value = index;
-                item.description = `${attributes[yearDefault].toLocaleString()} visitors`;
+                item.description = `${attributes[year].toLocaleString()} visitors`;
                 item.addEventListener("click", () => resultClickHandler(result, index));
                 item.appendChild(chip);
                 document.getElementById("result-list").appendChild(item);
