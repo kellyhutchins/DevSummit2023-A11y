@@ -52,16 +52,25 @@
           position: "top-right"
         });
         
-        search.on("search-complete",(results)=>{
-          // When the popup is visible set focus to the popup
-          // And once closed set focus back to the search wiget
-          reactiveUtils.watch(()=> view.popup.visible === true,()=>{
-            view.popup.focus();
-            reactiveUtils.watch(()=>view.popup.visible === false,()=>{
-              search.focus();
-            },{once:true})
-          },{once:true})
+        search.on("search-complete", () => onSearchComplete());
+        // Add the search widget to the top right corner of the view
+        view.ui.add(search, {
+          position: "top-right"
         });
+        let abortController = null;
+
+        async function onSearchComplete() {
+          abortController?.abort();
+          const { signal } = (abortController = new AbortController());
+
+          // When the popup is visible set focus on it.
+          await reactiveUtils.whenOnce(() => view.popup.visible, signal);
+          view.popup.focus();
+
+          // And when the popup is closed move the focus back to the search wiget.
+          await reactiveUtils.whenOnce(() => !view.popup.visible, signal);
+          search.focus();
+        }
       });
     </script>
  

@@ -32,11 +32,12 @@
             "esri/Graphic",
             "esri/widgets/BasemapToggle",
             "esri/core/reactiveUtils",
+            "esri/core/promiseUtils",
             "esri/views/support/colorUtils",
             "esri/views/MapView",
             "esri/widgets/Locate",
             "esri/symbols/SimpleMarkerSymbol"
-        ], (Map, Graphic, BasemapToggle, reactiveUtils, colorUtils, MapView, Locate, SimpleMarkerSymbol) => {
+        ], (Map, Graphic, BasemapToggle, reactiveUtils, promiseUtils, colorUtils, MapView, Locate, SimpleMarkerSymbol) => {
             let hasLocation = false;
             const lightColor = "#7A003C";
             const darkColor = "#fff";
@@ -74,19 +75,35 @@
                 nextBasemap: "dark-gray"
             })
             view.ui.add(basemapToggle, "bottom-right");
-            reactiveUtils.watch(() => view.map.basemap, () => {
-                reactiveUtils.watch(() => view.updating === false, async () => {
-                    // getBackgroundColor is also available 
-                    const backgroundTheme = await colorUtils.getBackgroundColorTheme(view);
-                    const color = backgroundTheme === "light" ? lightColor : darkColor;
-                    locate.graphic.symbol.color = color;
-                    if (hasLocation) {
-                        // We already have a graphic. Let's recreate
-                        view.graphics.removeAll();
-                        locate.locate();
-                    }
-                }, { once: true });
-            }, { initial: true });
+
+            let abortController = null;
+
+            const basemapHandle = reactiveUtils.watch(
+                () => view.map.basemap,
+                () => onBasemapChange(),
+                { initial: true }
+            );
+
+            // Remove watch handle when view is destroyed
+            view.addHandles(basemapHandle);
+
+            async function onBasemapChange() {
+                abortController?.abort();
+                const { signal } = (abortController = new AbortController());
+
+                await reactiveUtils.whenOnce(() => !view.updating, signal);
+
+                // getBackgroundColor is also available
+                const backgroundTheme = await colorUtils.getBackgroundColorTheme(view);
+                const color = backgroundTheme === "light" ? lightColor : darkColor;
+
+                locate.graphic.symbol.color = color;
+                if (hasLocation) {
+                // We already have a graphic. Let's recreate
+                view.graphics.removeAll();
+                locate.locate();
+                }
+            }
         });
     </script>
 </head>
